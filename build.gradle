@@ -1,15 +1,12 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '2.7.15'
-    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+    id 'org.springframework.boot' version '2.4.1' // Spring Boot 버전을 2.4.1로 변경
+    id 'io.spring.dependency-management' version '1.0.10.RELEASE' // Spring Dependency Management 버전 변경
 }
 
 group = 'inflearn'
 version = '0.0.1-SNAPSHOT'
-
-java {
-    sourceCompatibility = '1.8'
-}
+sourceCompatibility = '1.8'
 
 configurations {
     compileOnly {
@@ -26,8 +23,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+
     compileOnly 'org.projectlombok:lombok'
+
     runtimeOnly 'com.h2database:h2'
+
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
