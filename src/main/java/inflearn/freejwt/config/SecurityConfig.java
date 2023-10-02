@@ -7,13 +7,12 @@ import inflearn.freejwt.jwt.JwtSecurityConfig;
 import inflearn.freejwt.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,9 +21,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.filter.CorsFilter;
 
 @EnableWebSecurity // 기본적인 웹 시큐리티 설정을 활성화하겠다.
-// 추가적 설정을 위해서 WebSecurityConfigurer 을 implement 하거나
-// WebSecurityConfigureAdapter 를 extends 하는 방법이 있다.
-@EnableGlobalMethodSecurity(prePostEnabled = true) // @PreAuthorize 어노테이션을 메서드 단위로 추가하기 위해서 사용
+@EnableMethodSecurity // 추가
+@Configuration
 @RequiredArgsConstructor
 public class SecurityConfig { // extend 삭제
 
@@ -39,16 +37,6 @@ public class SecurityConfig { // extend 삭제
         return new BCryptPasswordEncoder();
     }
 
-    /**
-     * h2-console 하위 모든 요청들과 파비콘 관련 요청은
-     * Spring Security 로직을 수행하지 않고 접근할 수 있게 configure 메서드를 오버라이드해서 내용을 추가해준다.
-     */
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().antMatchers("/h2-console/**"
-                ,"/favicon.ico"
-                ,"/error");
-    }
 
     /**
      *
@@ -80,11 +68,10 @@ public class SecurityConfig { // extend 삭제
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // session을 사용하지 않음.
 
                 .and()
-                .authorizeRequests() // HttpServletRequest를 사용하는 요청들에 대한 접근 제한을 설정하겠다.
-                .antMatchers("/api/hello").permitAll() // /api/hello 에 대한 요청은 인증 없이 접근을 허용하겠다.
-                .antMatchers("/api/authenticate").permitAll()
-                .antMatchers("/api/signup").permitAll()
-                .anyRequest().authenticated() // 나머지 요청들에 대해서는 인증을 받아야 한다.
+                .authorizeHttpRequests()
+                .requestMatchers("/api/hello", "/api/authenticate", "/api/signup").permitAll()
+                .requestMatchers(PathRequest.toH2Console()).permitAll()
+                .anyRequest().authenticated()
 
                 .and()
                 .apply(new JwtSecurityConfig(tokenProvider));
