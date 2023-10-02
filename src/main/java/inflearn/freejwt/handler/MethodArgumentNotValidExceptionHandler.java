@@ -38,7 +38,7 @@ public class MethodArgumentNotValidExceptionHandler {
 
     // 필드 오류 목록을 처리하고 오류 응답 객체를 생성하는 메서드.
     private Error processFieldErrors(List<org.springframework.validation.FieldError> fieldErrors) {
-        Error error = new Error(HttpStatus.BAD_REQUEST.value(), "validation error");
+        Error error = new Error(HttpStatus.BAD_REQUEST.value(), "@Valid Error");
         for (org.springframework.validation.FieldError fieldError : fieldErrors) {
             error.addFieldError(fieldError.getObjectName(), fieldError.getField(), fieldError.getDefaultMessage());
         }
