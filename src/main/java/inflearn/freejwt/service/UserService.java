@@ -3,6 +3,7 @@ package inflearn.freejwt.service;
 import inflearn.freejwt.dto.UserDto;
 import inflearn.freejwt.entity.Authority;
 import inflearn.freejwt.entity.User;
+import inflearn.freejwt.exception.DuplicateMemberException;
 import inflearn.freejwt.repository.UserRepository;
 import inflearn.freejwt.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class UserService {
     @Transactional
     public User signup(UserDto userDto) {
         if (userRepository.findOneWithAuthoritiesByUsername(userDto.getUsername()).orElse(null) != null) {
-            throw new RuntimeException("이미 가입되어 있는 유저입니다.");
+            throw new DuplicateMemberException("이미 가입되어 있는 유저입니다."); // 변경
         }
         // 권한 정보 생성
         Authority authority = Authority.builder()
