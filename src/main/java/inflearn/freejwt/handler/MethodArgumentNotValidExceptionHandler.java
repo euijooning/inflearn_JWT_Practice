@@ -12,10 +12,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-
-import java.util.List;
-
 
 // 이 어노테이션은 클래스가 예외 처리기로 사용될 때 우선순위를 지정.
 // Ordered.HIGHEST_PRECEDENCE는 가장 높은 우선순위를 나타내며,
