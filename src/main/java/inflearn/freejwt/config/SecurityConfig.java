@@ -13,9 +13,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.filter.CorsFilter;
 
@@ -24,7 +26,7 @@ import org.springframework.web.filter.CorsFilter;
 // WebSecurityConfigureAdapter 를 extends 하는 방법이 있다.
 @EnableGlobalMethodSecurity(prePostEnabled = true) // @PreAuthorize 어노테이션을 메서드 단위로 추가하기 위해서 사용
 @RequiredArgsConstructor
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class SecurityConfig { // extend 삭제
 
     private final TokenProvider tokenProvider;
     private final CorsFilter corsFilter;
@@ -41,14 +43,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      * h2-console 하위 모든 요청들과 파비콘 관련 요청은
      * Spring Security 로직을 수행하지 않고 접근할 수 있게 configure 메서드를 오버라이드해서 내용을 추가해준다.
      */
-    @Override
-    public void configure(WebSecurity web) {
-        web.ignoring()
-                .antMatchers(
-                        "/h2-console/**"
-                        ,"/favicon.ico"
-                        ,"/error"
-                );
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring().antMatchers("/h2-console/**"
+                ,"/favicon.ico"
+                ,"/error");
     }
 
     /**
@@ -60,10 +59,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      * : 토큰을 사용하기 때문에 csrf 설정은 disable
      *  Exception을 핸들링할 때 만들었던 클래스들을 추가한다.
      */
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         // token을 사용하는 방식이기 때문에 csrf를 disable한다.
-        http.csrf().disable()
+        httpSecurity.csrf().disable()
                 .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling()
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)
@@ -89,5 +88,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
                 .and()
                 .apply(new JwtSecurityConfig(tokenProvider));
+
+        return httpSecurity.build();
     }
 }
