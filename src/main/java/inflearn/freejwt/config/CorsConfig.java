@@ -21,8 +21,9 @@ public class CorsConfig {
         // 요청에서 자격 증명(자격 증명 쿠키, 인증 등)을 허용
         config.setAllowCredentials(true);
 
-        // 모든 출처(Origin)를 허용
-        config.addAllowedOrigin("*");
+//        // 모든 출처(Origin)를 허용
+//        config.addAllowedOrigin("*");
+        config.addAllowedOriginPattern("*");
 
         // 모든 HTTP 헤더를 허용
         config.addAllowedHeader("*");
