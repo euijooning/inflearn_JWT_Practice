@@ -8,7 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.IOException;
 
 @RequiredArgsConstructor
 @RestController
@@ -45,6 +48,12 @@ public class UserController {
         return ResponseEntity.ok(userService.getMyUserWithAuthorities().get());
     }
 
+    // 추가
+    @PostMapping("/test-redirect")
+    public void testRedirect(HttpServletResponse response) throws IOException {
+        response.sendRedirect("/api/user");
+    }
+
 
 
     /**
@@ -56,10 +65,11 @@ public class UserController {
      */
     @GetMapping("/user/{username}")
     @PreAuthorize("hasAnyRole('ADMIN')")
-    public ResponseEntity<User> getUserInfo(@PathVariable String username) {
+    public ResponseEntity<User> getMyUserInfo(HttpServletRequest request) {
+//       System.out.println(request.getHeader("Authorization"));
         // userService를 사용하여 특정 사용자의 정보를 조회하고, 그 결과를 ResponseEntity로 반환함.
         // getUserWithAuthorities(username)는 특정 사용자 정보와 권한 정보를 함께 조회하는 서비스 메서드.
         // 반환된 정보는 ResponseEntity.ok()를 사용하여 HTTP 200 OK 상태와 함께 반환됨.
-        return ResponseEntity.ok(userService.getUserWithAuthorities(username).get());
+        return ResponseEntity.ok(userService.getMyUserWithAuthorities().get());
     }
 }
