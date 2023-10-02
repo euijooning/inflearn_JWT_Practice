@@ -22,8 +22,13 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
 
+    /**
+     *
+     * @param userDto
+     * @return
+     */
     @Transactional
-    public User signup(UserDto userDto) {
+    public UserDto signup(UserDto userDto) {
         if (userRepository.findOneWithAuthoritiesByUsername(userDto.getUsername()).orElse(null) != null) {
             throw new DuplicateMemberException("이미 가입되어 있는 유저입니다."); // 변경
         }
@@ -42,27 +47,27 @@ public class UserService {
                 .build();
 
         // 저장
-        return userRepository.save(user);
+        return UserDto.from(userRepository.save(user));
     }
+
 
     /**
      *
      * @param username
      * @return
-     * username을 기준으로 정보를 가져오는 메서드
      */
     @Transactional(readOnly = true)
-    public Optional<User> getUserWithAuthorities(String username) {
-        return userRepository.findOneWithAuthoritiesByUsername(username);
+    public UserDto getUserWithAuthorities(String username) {
+        return UserDto.from(userRepository.findOneWithAuthoritiesByUsername(username).orElse(null));
     }
 
     /**
-     * SecurityContext에 저장된 username의 정보만 가져온다.
+     *
      * @return
      */
     @Transactional(readOnly = true)
-    public Optional<User> getMyUserWithAuthorities() {
-        return SecurityUtil.getCurrentUsername().flatMap(userRepository::findOneWithAuthoritiesByUsername);
+    public UserDto getMyUserWithAuthorities() {
+        return UserDto.from(SecurityUtil.getCurrentUsername().flatMap(userRepository::findOneWithAuthoritiesByUsername).orElse(null));
     }
 
 }

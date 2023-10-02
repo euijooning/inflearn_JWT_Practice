@@ -14,7 +14,7 @@ import java.util.Set;
 @NoArgsConstructor
 public class User {
 
-    @JsonIgnore
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -23,14 +23,14 @@ public class User {
     @Column(name = "username", length = 50, unique = true)
     private String username;
 
-    @JsonIgnore
+
     @Column(name = "password")
     private String password;
 
     @Column(name = "nickname", length = 50)
     private String nickname;
 
-    @JsonIgnore
+
     @Column(name = "activated")
     private boolean activated;
 

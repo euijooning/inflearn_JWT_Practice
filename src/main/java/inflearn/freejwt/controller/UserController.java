@@ -21,55 +21,48 @@ public class UserController {
     private final UserService userService;
 
     /**
-     * 사용자 회원가입을 처리하는 엔드포인트.
+     * 사용자 등록을 처리하는 엔드포인트.
      *
-     * @param userdto 회원가입 요청에 필요한 사용자 정보를 담은 DTO 객체
-     * @return 회원가입이 성공하면 사용자 정보를 담은 ResponseEntity를 반환
+     * @param userDto 등록할 사용자 정보를 포함한 UserDto 객체
+     * @return ResponseEntity<UserDto> 등록된 사용자 정보를 포함한 ResponseEntity
      */
     @PostMapping("/signup")
-    public ResponseEntity<User> siginup(@Valid @RequestBody UserDto userdto) {
-        return ResponseEntity.ok(userService.signup(userdto));
+    public ResponseEntity<UserDto> signup(@Valid @RequestBody UserDto userDto) {
+        return ResponseEntity.ok(userService.signup(userDto));
     }
-
-
 
     /**
      * 현재 사용자의 정보를 조회하는 엔드포인트.
-     * 사용자 및 관리자 역할을 가진 사용자만 접근할 수 있다.
      *
-     * @return 현재 사용자의 정보를 담은 ResponseEntity를 반환
+     * @param request HttpServletRequest 객체
+     * @return ResponseEntity<UserDto> 현재 사용자 정보를 포함한 ResponseEntity
      */
     @GetMapping("/user")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ResponseEntity<User> getMyUserInfo() {
-        // userService를 사용하여 현재 사용자의 정보를 조회하고, 그 결과를 ResponseEntity로 반환.
-        // getMyUserWithAuthorities()는 현재 사용자의 정보와 권한 정보를 함께 조회하는 서비스 메서드.
-        // 반환된 정보는 ResponseEntity.ok()를 사용하여 HTTP 200 OK 상태와 함께 반환됨.
-        return ResponseEntity.ok(userService.getMyUserWithAuthorities().get());
+    public ResponseEntity<UserDto> getMyUserInfo(HttpServletRequest request) {
+        return ResponseEntity.ok(userService.getMyUserWithAuthorities());
     }
 
-    // 추가
+    /**
+     * 리디렉션 테스트를 위한 엔드포인트.
+     *
+     * @param response HttpServletResponse 객체
+     * @throws IOException 입출력 예외 발생 시
+     */
     @PostMapping("/test-redirect")
     public void testRedirect(HttpServletResponse response) throws IOException {
         response.sendRedirect("/api/user");
     }
 
-
-
     /**
      * 특정 사용자의 정보를 조회하는 엔드포인트.
-     * 관리자 역할을 가진 사용자만 접근할 수 있다.
      *
      * @param username 조회할 사용자의 이름
-     * @return 특정 사용자의 정보를 담은 ResponseEntity를 반환
+     * @return ResponseEntity<UserDto> 조회된 사용자 정보를 포함한 ResponseEntity
      */
     @GetMapping("/user/{username}")
     @PreAuthorize("hasAnyRole('ADMIN')")
-    public ResponseEntity<User> getMyUserInfo(HttpServletRequest request) {
-//       System.out.println(request.getHeader("Authorization"));
-        // userService를 사용하여 특정 사용자의 정보를 조회하고, 그 결과를 ResponseEntity로 반환함.
-        // getUserWithAuthorities(username)는 특정 사용자 정보와 권한 정보를 함께 조회하는 서비스 메서드.
-        // 반환된 정보는 ResponseEntity.ok()를 사용하여 HTTP 200 OK 상태와 함께 반환됨.
-        return ResponseEntity.ok(userService.getMyUserWithAuthorities().get());
+    public ResponseEntity<UserDto> getUserInfo(@PathVariable String username) {
+        return ResponseEntity.ok(userService.getUserWithAuthorities(username));
     }
 }
