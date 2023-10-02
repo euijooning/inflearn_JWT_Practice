@@ -48,34 +48,37 @@ public class SecurityConfig { // extend 삭제
      *  Exception을 핸들링할 때 만들었던 클래스들을 추가한다.
      */
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        // token을 사용하는 방식이기 때문에 csrf를 disable한다.
-        httpSecurity.csrf().disable()
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                // token을 사용하는 방식이기 때문에 csrf를 disable합니다.
+                .csrf(csrf -> csrf.disable())
+
                 .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling()
-                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
-                .accessDeniedHandler(jwtAccessDeniedHandler)
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .accessDeniedHandler(jwtAccessDeniedHandler)
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                )
 
-                // h2-console을 위한 설정
-                .and()
-                .headers()
-                .frameOptions()
-                .sameOrigin()
+                .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
+                        .requestMatchers("/api/hello", "/api/authenticate", "/api/signup").permitAll()
+                        .requestMatchers(PathRequest.toH2Console()).permitAll()
+                        .anyRequest().authenticated()
+                )
 
+                // 세션을 사용하지 않기 때문에 STATELESS로 설정
+                .sessionManagement(sessionManagement ->
+                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
 
-                .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // session을 사용하지 않음.
+                // enable h2-console
+                .headers(headers ->
+                        headers.frameOptions(options ->
+                                options.sameOrigin()
+                        )
+                )
 
-                .and()
-                .authorizeHttpRequests()
-                .requestMatchers("/api/hello", "/api/authenticate", "/api/signup").permitAll()
-                .requestMatchers(PathRequest.toH2Console()).permitAll()
-                .anyRequest().authenticated()
-
-                .and()
                 .apply(new JwtSecurityConfig(tokenProvider));
-
-        return httpSecurity.build();
+        return http.build();
     }
 }
+
